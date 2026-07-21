@@ -166,6 +166,10 @@ class OrderAgentTools:
         self.telegram_user_id = telegram_user_id
         self.user_text = user_text
         self._submitted_order_id: str | None = None
+        self._clear_history = False
+
+    def should_clear_history(self) -> bool:
+        return self._clear_history
 
     def _draft(self) -> dict[str, Any]:
         return self.state.model_dump(mode="json")
@@ -317,6 +321,7 @@ class OrderAgentTools:
 
     async def cancel_order(self, _: dict[str, Any]) -> dict[str, Any]:
         self.state.reset_for_new_order()
+        self._clear_history = True
         return {"ok": True, "message": "Order draft cleared"}
 
     async def submit_order(self, _: dict[str, Any]) -> dict[str, Any]:
@@ -336,4 +341,5 @@ class OrderAgentTools:
         )
         self._submitted_order_id = created.order_id
         self.state.reset_for_new_order()
+        self._clear_history = True
         return {"ok": True, "order_id": created.order_id, "total": created.total}

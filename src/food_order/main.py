@@ -50,7 +50,7 @@ async def run() -> None:
         agent=agent,
     )
 
-    sessions = SessionStore()
+    sessions = SessionStore(history_limit=settings.dialog_history_limit)
     await sessions.init()
 
     dp = create_dispatcher(settings, orchestrator, sessions)

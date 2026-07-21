@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     )
     menu_cache_ttl_seconds: int = Field(default=900, alias="MENU_CACHE_TTL_SECONDS")
     cache_ttl_seconds: int = Field(default=900, alias="CACHE_TTL_SECONDS")
+    dialog_history_limit: int = Field(default=6, alias="DIALOG_HISTORY_LIMIT")
 
     fixtures_dir: Path = Field(default=Path("config/fixtures"))
 

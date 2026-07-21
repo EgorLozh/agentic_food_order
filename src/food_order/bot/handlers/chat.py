@@ -28,13 +28,24 @@ async def handle_text(
     _user_locks.add(user_id)
     try:
         await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
-        state = await sessions.get(user_id)
+        session = await sessions.get(user_id)
+        user_text = message.text.strip()
         result = await orchestrator.handle_message(
             telegram_user_id=user_id,
-            text=message.text.strip(),
-            state=state,
+            text=user_text,
+            state=session.state,
+            history=session.history,
         )
-        await sessions.save(user_id, result.state)
+        session.state = result.state
+        if result.clear_history:
+            session.history = []
+        else:
+            sessions.append_turn(
+                session,
+                user_text=user_text,
+                assistant_text=result.reply_text,
+            )
+        await sessions.save(user_id, session)
         await message.answer(result.reply_text)
     finally:
         _user_locks.discard(user_id)
