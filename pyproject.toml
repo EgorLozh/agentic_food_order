@@ -1,0 +1,36 @@
+[project]
+name = "food-order"
+version = "0.1.0"
+description = "AI assistant for food pickup orders via Telegram"
+requires-python = ">=3.11"
+dependencies = [
+    "aiogram>=3.13.0",
+    "asyncpg>=0.29.0",
+    "gspread>=6.1.0",
+    "google-auth>=2.35.0",
+    "openai>=1.54.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "pyyaml>=6.0.2",
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[project.scripts]
+food-order-bot = "food_order.main:main"
+
+[build-system]
+requires = ["setuptools>=75.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

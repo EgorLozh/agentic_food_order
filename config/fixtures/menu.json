@@ -1,0 +1,26 @@
+[
+  {
+    "sku_id": "shaurma",
+    "category": "Основное",
+    "name": "Шаурма",
+    "aliases": ["шаурму", "шаверма", "шаверму"],
+    "price": 250,
+    "available": true
+  },
+  {
+    "sku_id": "cola",
+    "category": "Напитки",
+    "name": "Кола",
+    "aliases": ["колу", "coca-cola", "кока-кола"],
+    "price": 120,
+    "available": true
+  },
+  {
+    "sku_id": "fries",
+    "category": "Гарниры",
+    "name": "Картофель фри",
+    "aliases": ["фри", "картошку фри"],
+    "price": 150,
+    "available": true
+  }
+]

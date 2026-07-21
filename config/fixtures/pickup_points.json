@@ -1,0 +1,20 @@
+[
+  {
+    "point_id": "center",
+    "name": "Центр",
+    "aliases": ["центр", "в центре", "на центре"],
+    "active": true
+  },
+  {
+    "point_id": "north",
+    "name": "Север",
+    "aliases": ["север", "на севере"],
+    "active": true
+  },
+  {
+    "point_id": "south",
+    "name": "Юг",
+    "aliases": ["юг", "на юге"],
+    "active": true
+  }
+]

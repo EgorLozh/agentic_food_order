@@ -1,0 +1,22 @@
+cafes:
+  - cafe_id: 67
+    cafe_name: "Центр"
+    addr_of_cafe: "ул. Ленина, 10"
+    formal_addr_of_cafe: "Ижевск, ул. Ленина, 10"
+    city: "Ижевск"
+    aliases: ["центр", "на ленина", "в центре", "на центре"]
+    active: true
+  - cafe_id: 68
+    cafe_name: "Север"
+    addr_of_cafe: "ул. Гагарина, 5"
+    formal_addr_of_cafe: "Ижевск, ул. Гагарина, 5"
+    city: "Ижевск"
+    aliases: ["север", "на севере", "гагарина"]
+    active: true
+  - cafe_id: 69
+    cafe_name: "Юг"
+    addr_of_cafe: "ул. Пушкинская, 20"
+    formal_addr_of_cafe: "Ижевск, ул. Пушкинская, 20"
+    city: "Ижевск"
+    aliases: ["юг", "на юге", "пушкинская"]
+    active: true

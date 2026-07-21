@@ -1,0 +1,9 @@
+required_fields:
+  - items
+  - pickup_point_id
+  - pickup_time
+  - payment_method
+payment_methods:
+  - cash
+  - card
+fulfillment: pickup_only
