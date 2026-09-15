@@ -47,6 +47,7 @@ def format_admin_order_message(
             f"Самовывоз: {pickup}",
             f"Время: {state.pickup_time or '—'}",
             f"Оплата: {payment}",
+            f"Телефон: {state.phone or '—'}",
             f"Итого: {total:.0f} ₽",
         ]
     )
@@ -81,6 +82,7 @@ class TelegramAdminOrderSink(OrderSink):
             "cafe_id": state.pickup_point_id or "",
             "pickup_time": state.pickup_time or "",
             "payment": state.payment_method.value if state.payment_method else "",
+            "phone": state.phone or "",
             "total": total,
             "status": "new",
             "admin_notified": True,

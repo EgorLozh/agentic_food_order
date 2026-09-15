@@ -96,6 +96,7 @@ class JsonFixturesAdapter(DataAdapter):
             "items_json": [item.model_dump() for item in state.items],
             "pickup_time": state.pickup_time,
             "payment": state.payment_method.value if state.payment_method else None,
+            "phone": state.phone,
             "total": total,
             "status": "new",
         }

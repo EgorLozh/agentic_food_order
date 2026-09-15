@@ -3,6 +3,7 @@ required_fields:
   - pickup_point_id
   - pickup_time
   - payment_method
+  - phone
 payment_methods:
   - cash
   - card

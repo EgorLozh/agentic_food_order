@@ -76,6 +76,7 @@ def test_format_admin_order_message() -> None:
         pickup_point_address="ул. Пушкинская, 20",
         pickup_time="16:30",
         payment_method=PaymentMethod.CARD,
+        phone="+79001234567",
     )
     text = format_admin_order_message(
         order_id="ORD-TEST",
@@ -88,6 +89,7 @@ def test_format_admin_order_message() -> None:
     assert "Куриная Мини 200г" in text
     assert "16:30" in text
     assert "картой" in text
+    assert "+79001234567" in text
 
 
 @pytest.mark.asyncio
@@ -101,6 +103,7 @@ async def test_telegram_admin_order_sink_sends_message() -> None:
         pickup_point_name="Центр",
         pickup_time="14:00",
         payment_method=PaymentMethod.CASH,
+        phone="89001234567",
     )
     created = await sink.create_order(telegram_user_id=7, state=state, total=500)
     assert created.order_id.startswith("ORD-")

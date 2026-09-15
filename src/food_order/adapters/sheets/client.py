@@ -172,6 +172,7 @@ class FeedMerSheetsAdapter(DataAdapter):
             ),
             "pickup_time": state.pickup_time or "",
             "payment": state.payment_method.value if state.payment_method else "",
+            "phone": state.phone or "",
             "total": total,
             "status": "new",
         }
@@ -187,6 +188,7 @@ class FeedMerSheetsAdapter(DataAdapter):
                 payload["payment"],
                 payload["total"],
                 payload["status"],
+                payload["phone"],
             ],
             value_input_option="USER_ENTERED",
         )

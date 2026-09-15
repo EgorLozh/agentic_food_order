@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 from typing import Any
 
 import structlog
@@ -17,7 +16,10 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "get_order_draft",
-            "description": "Получить текущий проверенный черновик заказа.",
+            "description": (
+                "Черновик уже есть в current_draft. Вызывай только чтобы сверить состояние "
+                "после tool calls в этом ходе."
+            ),
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
@@ -25,7 +27,11 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "get_menu",
-            "description": "Получить всё доступное меню текущего кафе с реальными SKU, названиями, ценами, описаниями и весом. Перед set_items обязательно вызови этот tool.",
+            "description": (
+                "Получить доступное меню с реальными SKU, названиями, ценами, описаниями и весом. "
+                "Вызови перед set_items, если SKU ещё нет в результатах tools этого хода. "
+                "Не выдумывай SKU и не бери их из истории диалога."
+            ),
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
@@ -33,7 +39,12 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_items",
-            "description": "Добавить или заменить позиции черновика по SKU, полученному из get_menu.",
+            "description": (
+                "Добавить или заменить позиции по SKU из get_menu. "
+                "По умолчанию позиции мержатся: qty того же SKU суммируется. "
+                "Передай replace=true, если клиент заново перечислил весь состав заказа "
+                "или хочет заменить позиции, а не добавить."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -60,7 +71,7 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "list_pickup_points",
-            "description": "Получить доступные реальные пункты самовывоза.",
+            "description": "Получить доступные пункты самовывоза (название и адрес). Не выдумывай точки.",
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
@@ -68,7 +79,7 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_pickup_point",
-            "description": "Установить пункт самовывоза по названию или адресу; проверяет совпадение с доступными точками.",
+            "description": "Установить пункт самовывоза по названию или адресу из list_pickup_points.",
             "parameters": {
                 "type": "object",
                 "properties": {"query": {"type": "string"}},
@@ -81,7 +92,7 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_pickup_time",
-            "description": "Установить время самовывоза строго в формате HH:MM.",
+            "description": "Установить время самовывоза строго HH:MM, 24 часа. Не выдумывай час из «вечером» или «через час».",
             "parameters": {
                 "type": "object",
                 "properties": {"time": {"type": "string"}},
@@ -94,7 +105,10 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_payment_method",
-            "description": "Установить способ оплаты: cash или card.",
+            "description": (
+                "Установить оплату: внутренние значения cash или card. "
+                "Клиенту говори «наличные» / «карта»."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {"payment_method": {"type": "string", "enum": ["cash", "card"]}},
@@ -106,8 +120,28 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "set_phone",
+            "description": (
+                "Сохранить телефон клиента для заказа. Передай номер, как сказал клиент; "
+                "tool нормализует в +7XXXXXXXXXX. Не выдумывай номер и не подставляй Telegram ID."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {"phone": {"type": "string"}},
+                "required": ["phone"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_order_summary",
-            "description": "Проверить полноту и получить итог заказа. Если все поля заполнены, заказ переводится в ожидание явного подтверждения клиента.",
+            "description": (
+                "Проверить полноту (позиции, точка, время, оплата, телефон) и получить итог. "
+                "Если всё заполнено, статус станет awaiting_confirmation — после этого можно "
+                "просить согласие и при согласии в текущем сообщении вызывать submit_order."
+            ),
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
@@ -115,7 +149,7 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "cancel_order",
-            "description": "Отменить и очистить текущий черновик заказа.",
+            "description": "Отменить и очистить текущий черновик, если клиент отменяет заказ целиком.",
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
@@ -123,31 +157,26 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "submit_order",
-            "description": "Передать заказ администратору. Вызывай только после get_order_summary и лишь когда текущее сообщение пользователя является явным подтверждением.",
+            "description": (
+                "Передать заказ администратору. Вызывай только после успешного get_order_summary "
+                "и только если текущее сообщение клиента — согласие со сводкой. "
+                "Не вызывай при вопросах, правках или неуверенности."
+            ),
             "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
         },
     },
 ]
 
-_CONFIRMATIONS = {
-    "да",
-    "да все верно",
-    "все верно",
-    "всё верно",
-    "подтверждаю",
-    "подтверждаю заказ",
-    "оформляй",
-    "оформляйте",
-    "оформить",
-}
 _TIME_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 
 
-def is_explicit_confirmation(text: str) -> bool:
-    normalized = unicodedata.normalize("NFKC", text.lower()).strip()
-    normalized = re.sub(r"[^\w\s]", " ", normalized)
-    normalized = re.sub(r"\s+", " ", normalized).strip()
-    return normalized in _CONFIRMATIONS
+def normalize_ru_phone(raw: str) -> str | None:
+    digits = re.sub(r"\D", "", raw or "")
+    if len(digits) == 11 and digits[0] in "78":
+        return f"+7{digits[1:]}"
+    if len(digits) == 10:
+        return f"+7{digits}"
+    return None
 
 
 class OrderAgentTools:
@@ -158,13 +187,11 @@ class OrderAgentTools:
         schema: OrderSchema,
         state: OrderState,
         telegram_user_id: int,
-        user_text: str,
     ) -> None:
         self.tools = tools
         self.schema = schema
         self.state = state
         self.telegram_user_id = telegram_user_id
-        self.user_text = user_text
         self._submitted_order_id: str | None = None
         self._clear_history = False
 
@@ -184,6 +211,8 @@ class OrderAgentTools:
             missing.append("pickup_time")
         if "payment_method" in self.schema.required_fields and not self.state.payment_method:
             missing.append("payment_method")
+        if "phone" in self.schema.required_fields and not self.state.phone:
+            missing.append("phone")
         return missing
 
     def _mark_collecting(self) -> None:
@@ -199,6 +228,7 @@ class OrderAgentTools:
             "set_pickup_point": self.set_pickup_point,
             "set_pickup_time": self.set_pickup_time,
             "set_payment_method": self.set_payment_method,
+            "set_phone": self.set_phone,
             "get_order_summary": self.get_order_summary,
             "cancel_order": self.cancel_order,
             "submit_order": self.submit_order,
@@ -301,6 +331,17 @@ class OrderAgentTools:
         self._mark_collecting()
         return {"ok": True, "payment_method": value}
 
+    async def set_phone(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        normalized = normalize_ru_phone(str(arguments.get("phone") or ""))
+        if normalized is None:
+            return {
+                "ok": False,
+                "error": "Phone must be a Russian number: +7XXXXXXXXXX or 8XXXXXXXXXX",
+            }
+        self.state.phone = normalized
+        self._mark_collecting()
+        return {"ok": True, "phone": normalized}
+
     async def get_order_summary(self, _: dict[str, Any]) -> dict[str, Any]:
         missing = self._missing_fields()
         if missing:
@@ -314,6 +355,7 @@ class OrderAgentTools:
                 "pickup_address": self.state.pickup_point_address,
                 "pickup_time": self.state.pickup_time,
                 "payment_method": self.state.payment_method.value if self.state.payment_method else None,
+                "phone": self.state.phone,
                 "total": self.tools.calculate_order(self.state),
             },
             "requires_explicit_confirmation": True,
@@ -332,8 +374,6 @@ class OrderAgentTools:
             return {"ok": False, "error": "Order is incomplete", "missing_fields": missing}
         if self.state.status != OrderStatus.AWAITING_CONFIRMATION:
             return {"ok": False, "error": "Call get_order_summary and wait for customer confirmation first"}
-        if not is_explicit_confirmation(self.user_text):
-            return {"ok": False, "error": "Current user message is not an explicit confirmation"}
 
         created = await self.tools.create_order(
             telegram_user_id=self.telegram_user_id,

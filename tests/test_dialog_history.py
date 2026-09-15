@@ -80,6 +80,8 @@ async def test_agent_receives_history_in_messages() -> None:
     assert llm.last_messages[2]["content"] == "Какую именно?"
     payload = json.loads(llm.last_messages[3]["content"])
     assert payload["user_message"] == "мини"
+    assert "phone" in payload["required_fields"]
+    assert payload["fulfillment"] == "самовывоз, доставки нет"
 
 
 @pytest.mark.asyncio

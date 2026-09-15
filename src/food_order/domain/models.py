@@ -60,6 +60,7 @@ class OrderState(BaseModel):
     pickup_point_address: str | None = None
     pickup_time: str | None = None
     payment_method: PaymentMethod | None = None
+    phone: str | None = None
     status: OrderStatus = OrderStatus.COLLECTING
     last_order_id: str | None = None
     pending_clarifications: list[PendingClarification] = Field(default_factory=list)
@@ -72,6 +73,7 @@ class OrderState(BaseModel):
         self.pickup_point_address = None
         self.pickup_time = None
         self.payment_method = None
+        self.phone = None
         self.status = OrderStatus.COLLECTING
         self.last_order_id = None
         self.pending_clarifications = []
