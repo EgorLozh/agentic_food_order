@@ -1,0 +1,23 @@
+id: stepwise_slots
+description: Слоты по очереди + submit (ADMIN=test account)
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная шаурма Стандарт, одну"
+  - send: "Точка Raketa на Молодежной 107б"
+    expect_contains:
+      - "Молодеж"
+  - send: "К 15:30"
+  - send: "Оплата наличными"
+  - send: "Телефон +7 900 123-45-67"
+    expect_contains:
+      - "подтверд"
+      - "Молодеж"
+  - send: "да"
+    await_replies: 2
+    expect_contains:
+      - "Новый заказ"
+      - "ORD-"
+      - "Молодеж"

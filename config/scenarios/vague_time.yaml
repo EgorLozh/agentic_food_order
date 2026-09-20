@@ -1,0 +1,10 @@
+id: vague_time
+description: Время «вечером» — нужна конкретная HH:MM
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт на Молодежной 107б вечером, картой, телефон 89001234567"
+    expect_contains:
+      - "время"

@@ -1,0 +1,10 @@
+id: unknown_item
+description: Несуществующее блюдо — отказ, без выдуманного SKU
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Хочу заказать ксенобургер из марса"
+    expect_contains:
+      - "нет"

@@ -8,3 +8,6 @@ dist/
 *.egg-info/
 .pytest_cache/
 data/
+*.session
+*.session-journal
+reports/

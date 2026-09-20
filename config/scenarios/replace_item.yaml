@@ -1,0 +1,20 @@
+id: replace_item
+description: Замена позиции после сводки + submit
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт к 14:00 на Молодежной 107б, картой, телефон 89001234567"
+    expect_contains:
+      - "подтверд"
+  - send: "Замени на Свиную Биг"
+    expect_contains:
+      - "свин"
+      - "подтверд"
+  - send: "да"
+    await_replies: 2
+    expect_contains:
+      - "Новый заказ"
+      - "ORD-"
+      - "свин"

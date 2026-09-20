@@ -20,9 +20,13 @@ dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
 ]
+eval = [
+    "telethon>=1.36.0",
+]
 
 [project.scripts]
 food-order-bot = "food_order.main:main"
+food-order-bench = "food_order.bench.cli:main"
 
 [build-system]
 requires = ["setuptools>=75.0.0"]

@@ -16,5 +16,5 @@ async def cmd_start(message: Message, sessions: SessionStore) -> None:
     await message.answer(
         "Привет! Я помогу оформить заказ на самовывоз.\n"
         "Напишите заказ свободным текстом, например:\n"
-        "«Две шаурмы и колу к 14:00 на Центр»"
+        "«Две шаурмы и колу к 14:00»"
     )

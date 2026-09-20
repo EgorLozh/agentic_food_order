@@ -1,0 +1,20 @@
+id: edit_after_summary
+description: Смена времени после сводки + submit
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт к 14:00 на Молодежной 107б, наличными, телефон 89001234567"
+    expect_contains:
+      - "подтверд"
+  - send: "Перенеси на 16:00"
+    expect_contains:
+      - "16:00"
+      - "подтверд"
+  - send: "да"
+    await_replies: 2
+    expect_contains:
+      - "Новый заказ"
+      - "ORD-"
+      - "16:00"

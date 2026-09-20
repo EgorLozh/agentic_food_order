@@ -1,0 +1,13 @@
+id: cancel_flow
+description: Старт диалога и отмена заказа
+turns:
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт на Молодежной"
+  - send: "/cancel"
+    expect_contains:
+      - "отмен"
+  - send: "/start"
+    expect_contains:
+      - "заказ"

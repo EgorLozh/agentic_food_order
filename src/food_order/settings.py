@@ -1,6 +1,9 @@
-from pathlib import Path
+from __future__ import annotations
 
-from pydantic import Field, field_validator
+from pathlib import Path
+from typing import Literal
+
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,9 +15,19 @@ class Settings(BaseSettings):
     )
 
     bot_token: str = Field(alias="BOT_TOKEN")
-    openai_api_key: str = Field(alias="OPENAI_API_KEY")
+
+    llm_provider: Literal["openai", "ollama"] = Field(
+        default="openai", alias="LLM_PROVIDER"
+    )
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
     openai_base_url: str | None = Field(default=None, alias="OPENAI_BASE_URL")
+
+    ollama_base_url: str = Field(
+        default="http://localhost:11434/v1", alias="OLLAMA_BASE_URL"
+    )
+    ollama_model: str = Field(default="gemma4:31b", alias="OLLAMA_MODEL")
+    ollama_api_key: str = Field(default="ollama", alias="OLLAMA_API_KEY")
 
     admin_telegram_id: int | None = Field(default=None, alias="ADMIN_TELEGRAM_ID")
     database_url: str | None = Field(default=None, alias="DATABASE_URL")
@@ -47,7 +60,7 @@ class Settings(BaseSettings):
 
     fixtures_dir: Path = Field(default=Path("config/fixtures"))
 
-    llm_timeout_seconds: float = 30.0
+    llm_timeout_seconds: float = Field(default=30.0, alias="LLM_TIMEOUT_SECONDS")
     llm_max_tokens: int | None = Field(default=None, alias="LLM_MAX_TOKENS")
 
     @field_validator("pos_sync_enabled", mode="before")
@@ -58,6 +71,12 @@ class Settings(BaseSettings):
         if value is None:
             return False
         return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+    @model_validator(mode="after")
+    def require_openai_api_key(self) -> Settings:
+        if self.llm_provider == "openai" and not self.openai_api_key:
+            raise ValueError("OPENAI_API_KEY is required when LLM_PROVIDER=openai")
+        return self
 
     def has_sheets_credentials(self) -> bool:
         return bool(

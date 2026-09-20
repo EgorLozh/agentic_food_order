@@ -1,0 +1,19 @@
+id: happy_shaurma
+description: Полный заказ до submit — клиент + админ «Новый заказ» (ADMIN=test account)
+turns:
+  - send: "/cancel"
+    expect_contains:
+      - "отмен"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт и Dobriy газ. вода 0.5 к 14:00 на Молодежной 107б, картой, телефон 89001234567"
+    expect_contains:
+      - "подтверд"
+      - "Молодеж"
+  - send: "да"
+    await_replies: 2
+    expect_contains:
+      - "Новый заказ"
+      - "ORD-"
+      - "Молодеж"

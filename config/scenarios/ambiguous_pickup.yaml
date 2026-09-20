@@ -1,0 +1,11 @@
+id: ambiguous_pickup
+description: Неоднозначная точка «Ракета» — бот перечисляет обе
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Куриная Стандарт на Ракете к 14:00"
+    expect_contains:
+      - "Молодеж"
+      - "Петров"

@@ -14,13 +14,29 @@ T = TypeVar("T", bound=BaseModel)
 
 class LLMClient:
     def __init__(self, settings: Settings) -> None:
-        kwargs: dict = {"api_key": settings.openai_api_key}
-        if settings.openai_base_url:
-            kwargs["base_url"] = settings.openai_base_url
+        if settings.llm_provider == "ollama":
+            kwargs: dict = {
+                "api_key": settings.ollama_api_key,
+                "base_url": settings.ollama_base_url,
+            }
+            self.model = settings.ollama_model
+        else:
+            kwargs = {"api_key": settings.openai_api_key}
+            if settings.openai_base_url:
+                kwargs["base_url"] = settings.openai_base_url
+            self.model = settings.openai_model
+
         self.client = AsyncOpenAI(**kwargs)
-        self.model = settings.openai_model
+        self.provider = settings.llm_provider
         self.timeout = settings.llm_timeout_seconds
         self.max_tokens = settings.llm_max_tokens
+
+    def _token_limit_kwargs(self) -> dict[str, int]:
+        if self.max_tokens is None:
+            return {}
+        if self.provider == "ollama":
+            return {"max_tokens": self.max_tokens}
+        return {"max_completion_tokens": self.max_tokens}
 
     async def parse(
         self,
@@ -36,8 +52,8 @@ class LLMClient:
                 {"role": "user", "content": user},
             ],
             response_format=schema,
-            max_completion_tokens=self.max_tokens,
             timeout=self.timeout,
+            **self._token_limit_kwargs(),
         )
         message = response.choices[0].message
         if message.parsed is not None:
@@ -57,8 +73,8 @@ class LLMClient:
             messages=messages,  # type: ignore[arg-type]
             tools=tools,  # type: ignore[arg-type]
             tool_choice="auto",
-            max_completion_tokens=self.max_tokens,
             timeout=self.timeout,
+            **self._token_limit_kwargs(),
         )
         if not response.choices:
             raise RuntimeError("LLM returned no completion choices")

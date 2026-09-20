@@ -1,0 +1,10 @@
+id: ambiguous_item
+description: Шаурма без вида/размера — агент уточняет, не угадывает
+turns:
+  - send: "/cancel"
+  - send: "/start"
+    expect_contains:
+      - "заказ"
+  - send: "Хочу шаурму"
+    expect_contains:
+      - "размер"
