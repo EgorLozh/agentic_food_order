@@ -6,12 +6,13 @@ turns:
     expect_contains:
       - "заказ"
   - send: "Куриная Стандарт к 14:00 на Молодежной 107б, картой, телефон 89001234567"
-    expect_contains:
-      - "подтверд"
+    expect_regex: "(подтверд|подтверж)"
+    expect_not_contains:
+      - "один шаг"
   - send: "Замени на Свиную Биг"
     expect_contains:
       - "свин"
-      - "подтверд"
+    expect_regex: "(подтверд|подтверж)"
   - send: "да"
     await_replies: 2
     expect_contains:

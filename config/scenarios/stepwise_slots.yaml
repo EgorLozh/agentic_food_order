@@ -6,6 +6,8 @@ turns:
     expect_contains:
       - "заказ"
   - send: "Куриная шаурма Стандарт, одну"
+    expect_not_contains:
+      - "один шаг"
   - send: "Точка Raketa на Молодежной 107б"
     expect_contains:
       - "Молодеж"
@@ -13,8 +15,8 @@ turns:
   - send: "Оплата наличными"
   - send: "Телефон +7 900 123-45-67"
     expect_contains:
-      - "подтверд"
       - "Молодеж"
+    expect_regex: "(подтверд|подтверж)"
   - send: "да"
     await_replies: 2
     expect_contains:

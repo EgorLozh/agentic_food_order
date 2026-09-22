@@ -79,7 +79,11 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_pickup_point",
-            "description": "Установить пункт самовывоза по названию или адресу из list_pickup_points.",
+            "description": (
+                "Установить пункт самовывоза по названию или адресу из list_pickup_points. "
+                "Если tool вернул candidates — перечисли их клиенту и спроси, какую выбрать; "
+                "не выбирай первую молча."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {"query": {"type": "string"}},
@@ -92,7 +96,11 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "set_pickup_time",
-            "description": "Установить время самовывоза строго HH:MM, 24 часа. Не выдумывай час из «вечером» или «через час».",
+            "description": (
+                "Установить время самовывоза строго HH:MM, 24 часа. "
+                "Не вызывай, если клиент сказал только «вечером» / «утром» / «через час» "
+                "без конкретного HH:MM — сначала уточни время."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {"time": {"type": "string"}},
@@ -169,6 +177,14 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
 
 _TIME_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 
+_MISSING_FIELD_LABELS = {
+    "items": "позиции",
+    "pickup_point_id": "точку самовывоза",
+    "pickup_time": "время (HH:MM)",
+    "payment_method": "способ оплаты",
+    "phone": "телефон",
+}
+
 
 def normalize_ru_phone(raw: str) -> str | None:
     digits = re.sub(r"\D", "", raw or "")
@@ -214,6 +230,30 @@ class OrderAgentTools:
         if "phone" in self.schema.required_fields and not self.state.phone:
             missing.append("phone")
         return missing
+
+    def _has_draft_progress(self) -> bool:
+        return bool(
+            self.state.items
+            or self.state.pickup_point_id
+            or self.state.pickup_time
+            or self.state.payment_method
+            or self.state.phone
+        )
+
+    def reply_on_tool_limit(self) -> str:
+        missing = self._missing_fields()
+        if not self._has_draft_progress() or not missing:
+            return (
+                "Не удалось завершить обработку запроса за один шаг. "
+                "Пожалуйста, уточните заказ или попробуйте ещё раз."
+            )
+        labels = [_MISSING_FIELD_LABELS[m] for m in missing if m in _MISSING_FIELD_LABELS]
+        if not labels:
+            return (
+                "Не удалось завершить обработку запроса за один шаг. "
+                "Пожалуйста, уточните заказ или попробуйте ещё раз."
+            )
+        return f"Уточните, пожалуйста: {', '.join(labels)}."
 
     def _mark_collecting(self) -> None:
         if self.state.status != OrderStatus.CREATED:
@@ -306,7 +346,15 @@ class OrderAgentTools:
 
     async def set_pickup_point(self, arguments: dict[str, Any]) -> dict[str, Any]:
         query = str(arguments.get("query") or "").strip()
-        point = await self.tools.resolve_point(query)
+        point, candidates = await self.tools.resolve_point(query)
+        if candidates:
+            return {
+                "ok": False,
+                "error": "Ambiguous pickup point. Ask the customer which one.",
+                "candidates": [
+                    {"name": c.name, "address": c.address} for c in candidates
+                ],
+            }
         if point is None:
             return {"ok": False, "error": "Pickup point not found. Call list_pickup_points."}
         self.state.pickup_point_id = point.point_id

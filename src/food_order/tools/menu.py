@@ -222,13 +222,21 @@ class MenuMatcher:
 def resolve_pickup_point(
     query: str | None,
     points: list[PickupPoint],
-) -> PickupPoint | None:
+) -> tuple[PickupPoint | None, list[PickupPoint]]:
+    """Resolve a pickup query.
+
+    Returns ``(point, [])`` on a clear match, ``(None, candidates)`` when several
+    points score close enough that the customer must choose, or ``(None, [])``
+    when nothing matches.
+    """
     if not query:
-        return None
+        return None, []
     query_stripped = query.strip()
-    for point in points:
-        if point.active and point.name == query_stripped:
-            return point
+    exact = [point for point in points if point.active and point.name == query_stripped]
+    if len(exact) == 1:
+        return exact[0], []
+    if len(exact) > 1:
+        return None, exact
 
     scored = [
         (point, _score_match(query, point.name, point.aliases))
@@ -237,9 +245,14 @@ def resolve_pickup_point(
     ]
     scored = [(point, score) for point, score in scored if score >= 0.75]
     if not scored:
-        return None
+        return None, []
     scored.sort(key=lambda x: x[1], reverse=True)
-    return scored[0][0]
+    best_point, best_score = scored[0]
+    if len(scored) == 1 or best_score - scored[1][1] >= 0.15:
+        return best_point, []
+    floor = max(0.75, best_score - 0.15)
+    candidates = [point for point, score in scored if score >= floor]
+    return None, candidates
 
 
 async def resolve_items_from_names(

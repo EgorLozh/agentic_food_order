@@ -11,6 +11,7 @@ import yaml
 class Turn:
     send: str
     expect_contains: list[str] = field(default_factory=list)
+    expect_not_contains: list[str] = field(default_factory=list)
     expect_regex: str | None = None
     timeout_s: float | None = None
     await_replies: int = 1
@@ -30,12 +31,16 @@ def _parse_turn(raw: dict[str, Any]) -> Turn:
     expect = raw.get("expect_contains") or []
     if isinstance(expect, str):
         expect = [expect]
+    forbid = raw.get("expect_not_contains") or []
+    if isinstance(forbid, str):
+        forbid = [forbid]
     await_replies = int(raw.get("await_replies") or 1)
     if await_replies < 1:
         raise ValueError("await_replies must be >= 1")
     return Turn(
         send=str(raw["send"]),
         expect_contains=[str(x) for x in expect],
+        expect_not_contains=[str(x) for x in forbid],
         expect_regex=raw.get("expect_regex"),
         timeout_s=float(raw["timeout_s"]) if raw.get("timeout_s") is not None else None,
         await_replies=await_replies,

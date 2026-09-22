@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     bot_token: str = Field(alias="BOT_TOKEN")
 
-    llm_provider: Literal["openai", "ollama"] = Field(
+    llm_provider: Literal["openai", "ollama", "deepseek"] = Field(
         default="openai", alias="LLM_PROVIDER"
     )
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     )
     ollama_model: str = Field(default="gemma4:31b", alias="OLLAMA_MODEL")
     ollama_api_key: str = Field(default="ollama", alias="OLLAMA_API_KEY")
+
+    deepseek_api_key: str | None = Field(default=None, alias="DEEPSEEK_API_KEY")
+    deepseek_model: str = Field(default="deepseek-flash", alias="DEEPSEEK_MODEL")
+    deepseek_base_url: str = Field(
+        default="https://api.deepseek.com", alias="DEEPSEEK_BASE_URL"
+    )
 
     admin_telegram_id: int | None = Field(default=None, alias="ADMIN_TELEGRAM_ID")
     database_url: str | None = Field(default=None, alias="DATABASE_URL")
@@ -73,9 +79,11 @@ class Settings(BaseSettings):
         return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
     @model_validator(mode="after")
-    def require_openai_api_key(self) -> Settings:
+    def require_provider_api_key(self) -> Settings:
         if self.llm_provider == "openai" and not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY is required when LLM_PROVIDER=openai")
+        if self.llm_provider == "deepseek" and not self.deepseek_api_key:
+            raise ValueError("DEEPSEEK_API_KEY is required when LLM_PROVIDER=deepseek")
         return self
 
     def has_sheets_credentials(self) -> bool:

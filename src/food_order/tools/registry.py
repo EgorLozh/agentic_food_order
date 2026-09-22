@@ -60,7 +60,9 @@ class ToolRegistry:
     ) -> tuple[list, list]:
         return await resolve_items_from_names(self.menu_source, raw_items)
 
-    async def resolve_point(self, query: str | None) -> PickupPoint | None:
+    async def resolve_point(
+        self, query: str | None
+    ) -> tuple[PickupPoint | None, list[PickupPoint]]:
         points = await self.get_pickup_points()
         return resolve_pickup_point(query, points)
 

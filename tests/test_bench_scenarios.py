@@ -28,6 +28,28 @@ def test_check_expectations() -> None:
     assert any(f.startswith("missing:") for f in failed)
 
 
+def test_check_expectations_not_contains() -> None:
+    turn = Turn(send="hi", expect_not_contains=["один шаг"])
+    assert check_expectations("Принял заказ, уточните точку", turn) == []
+    failed = check_expectations("Не удалось завершить обработку запроса за один шаг.", turn)
+    assert failed == ["forbidden:один шаг"]
+
+
+def test_check_expectations_regex() -> None:
+    turn = Turn(send="hi", expect_regex="(размер|мини|стандарт|биг)")
+    assert check_expectations("Какую: мини, стандарт или биг?", turn) == []
+    assert check_expectations("Что именно хотите?", turn) == [
+        "regex:(размер|мини|стандарт|биг)"
+    ]
+
+
+def test_load_ambiguous_item_uses_regex() -> None:
+    scenarios = load_scenarios(Path("config/scenarios"), only_id="ambiguous_item")
+    turn = scenarios[0].turns[-1]
+    assert turn.expect_regex
+    assert "размер" in turn.expect_regex
+
+
 def test_check_expectations_joined_replies() -> None:
     turn = Turn(
         send="да",

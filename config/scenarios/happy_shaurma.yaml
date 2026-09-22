@@ -9,8 +9,10 @@ turns:
       - "заказ"
   - send: "Куриная Стандарт и Dobriy газ. вода 0.5 к 14:00 на Молодежной 107б, картой, телефон 89001234567"
     expect_contains:
-      - "подтверд"
       - "Молодеж"
+    expect_regex: "(подтверд|подтверж)"
+    expect_not_contains:
+      - "один шаг"
   - send: "да"
     await_replies: 2
     expect_contains:

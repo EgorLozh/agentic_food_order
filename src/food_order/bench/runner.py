@@ -24,6 +24,9 @@ def check_expectations(reply: str, turn: Turn) -> list[str]:
     for needle in turn.expect_contains:
         if needle.casefold() not in lowered:
             failed.append(f"missing:{needle}")
+    for needle in turn.expect_not_contains:
+        if needle.casefold() in lowered:
+            failed.append(f"forbidden:{needle}")
     if turn.expect_regex:
         if re.search(turn.expect_regex, reply, flags=re.IGNORECASE | re.DOTALL) is None:
             failed.append(f"regex:{turn.expect_regex}")

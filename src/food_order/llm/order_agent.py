@@ -14,7 +14,7 @@ from food_order.tools.registry import ToolRegistry
 
 logger = structlog.get_logger(__name__)
 
-MAX_TOOL_ROUNDS = 8
+MAX_TOOL_ROUNDS = 12
 
 ORDER_AGENT_SYSTEM = """\
 Ты — агент заказа кафе на самовывоз в Telegram. Говори по-русски, коротко и естественно.
@@ -35,12 +35,14 @@ Tools:
 - set_items: по умолчанию добавляет/суммирует qty. replace=true, если клиент заново
   перечислил весь заказ или хочет заменить состав.
 - list_pickup_points / set_pickup_point — реальные точки, не выдумывай адреса.
-- set_pickup_time — только конкретное HH:MM (24 часа). «Вечером» / «через час» — уточни.
+- set_pickup_time — только конкретное HH:MM (24 часа). «Вечером» / «через час» — уточни,
+  не подставляй час сам.
 - set_payment_method — cash или card; клиенту говори «наличные» / «карта».
 - set_phone — только номер, который назвал клиент. Не выдумывай и не подставляй Telegram ID.
 - get_order_draft не нужен: черновик уже в current_draft.
 - cancel_order — если клиент отменяет заказ целиком.
-- Точку, время, оплату и телефон можно ставить в одном раунде. Menu→items — сначала menu.
+- В одном ответе можно вызвать несколько tools параллельно. Menu→items — сначала menu.
+- Точку, время, оплату и телефон можно ставить в одном раунде.
 - Не крути tools без прогресса. После нужных вызовов — один ответ клиенту.
 
 Подтверждение:
@@ -165,10 +167,7 @@ class OrderAgent:
 
         logger.warning("agent_tool_limit_reached", max_rounds=MAX_TOOL_ROUNDS)
         return AgentTurn(
-            reply_text=(
-                "Не удалось завершить обработку запроса за один шаг. "
-                "Пожалуйста, уточните заказ или попробуйте ещё раз."
-            ),
+            reply_text=tool_dispatcher.reply_on_tool_limit(),
             tool_rounds=MAX_TOOL_ROUNDS,
             clear_history=tool_dispatcher.should_clear_history(),
         )

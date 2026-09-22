@@ -61,6 +61,8 @@ def test_system_prompt_covers_phone_and_confirmation() -> None:
     assert "телефон" in ORDER_AGENT_SYSTEM.lower()
     assert "submit_order" in ORDER_AGENT_SYSTEM
     assert "replace=true" in ORDER_AGENT_SYSTEM
+    assert "вечером" in ORDER_AGENT_SYSTEM.lower()
+    assert "не подставляй час" in ORDER_AGENT_SYSTEM.lower()
 
 
 @pytest.mark.asyncio
@@ -121,6 +123,25 @@ async def test_invalid_slot_values_are_rejected(registry: ToolRegistry, schema) 
     assert not (await toolset.dispatch("set_payment_method", {"payment_method": "crypto"}))["ok"]
     assert not (await toolset.dispatch("set_pickup_point", {"query": "Несуществующая точка"}))["ok"]
     assert not (await toolset.dispatch("set_phone", {"phone": "123"}))["ok"]
+
+
+@pytest.mark.asyncio
+async def test_set_pickup_time_accepts_hhmm(registry: ToolRegistry, schema) -> None:
+    toolset = _agent_tools(registry, schema)
+    result = await toolset.dispatch("set_pickup_time", {"time": "19:00"})
+    assert result["ok"] is True
+    assert toolset.state.pickup_time == "19:00"
+
+
+@pytest.mark.asyncio
+async def test_reply_on_tool_limit_lists_missing(registry: ToolRegistry, schema) -> None:
+    toolset = _agent_tools(registry, schema)
+    menu = await toolset.dispatch("get_menu", {})
+    shaurma = next(item for item in menu["items"] if item["name"] == "Шаурма")
+    await toolset.dispatch("set_items", {"items": [{"sku_id": shaurma["sku_id"], "qty": 1}]})
+    reply = toolset.reply_on_tool_limit()
+    assert "Уточните" in reply
+    assert "время" in reply.lower() or "телефон" in reply.lower()
 
 
 @pytest.mark.asyncio

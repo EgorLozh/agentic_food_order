@@ -2,7 +2,7 @@ import pytest
 
 from food_order.adapters.json_fixtures import JsonFixturesAdapter
 from food_order.adapters.sheets.client import FeedMerSheetsAdapter
-from food_order.domain.models import MenuItem
+from food_order.domain.models import MenuItem, PickupPoint
 from food_order.tools.menu import MenuMatcher, resolve_pickup_point
 from pathlib import Path
 
@@ -59,10 +59,52 @@ async def test_pos_sync_in_fixtures(adapter: JsonFixturesAdapter) -> None:
 @pytest.mark.asyncio
 async def test_resolve_pickup_from_cafes_yaml(adapter: JsonFixturesAdapter) -> None:
     points = await adapter.get_pickup_points()
-    point = resolve_pickup_point("на центре", points)
+    point, candidates = resolve_pickup_point("на центре", points)
     assert point is not None
+    assert candidates == []
     assert point.point_id == "67"
     assert point.address == "ул. Ленина, 10"
+
+
+def test_resolve_pickup_ambiguous_shared_alias() -> None:
+    points = [
+        PickupPoint(
+            point_id="1",
+            name="Raketa на Молодежной",
+            aliases=["ракета", "на ракете"],
+            address="ул. Гагарина, 5",
+        ),
+        PickupPoint(
+            point_id="2",
+            name="Raketa на Петрова",
+            aliases=["ракета", "на ракете"],
+            address="ул. Петрова, 10",
+        ),
+    ]
+    point, candidates = resolve_pickup_point("на Ракете", points)
+    assert point is None
+    assert {c.point_id for c in candidates} == {"1", "2"}
+
+
+def test_resolve_pickup_clear_winner() -> None:
+    points = [
+        PickupPoint(
+            point_id="1",
+            name="Raketa на Молодежной",
+            aliases=["молодежная", "на молодежной"],
+            address="ул. Гагарина, 5",
+        ),
+        PickupPoint(
+            point_id="2",
+            name="Raketa на Петрова",
+            aliases=["петрова", "на петрова"],
+            address="ул. Петрова, 10",
+        ),
+    ]
+    point, candidates = resolve_pickup_point("Молодежной", points)
+    assert point is not None
+    assert point.point_id == "1"
+    assert candidates == []
 
 
 def test_feedmer_cache_guard_rejects_too_few() -> None:

@@ -6,5 +6,4 @@ turns:
     expect_contains:
       - "заказ"
   - send: "Хочу шаурму"
-    expect_contains:
-      - "размер"
+    expect_regex: "(размер|мини|стандарт|биг)"

@@ -20,6 +20,12 @@ class LLMClient:
                 "base_url": settings.ollama_base_url,
             }
             self.model = settings.ollama_model
+        elif settings.llm_provider == "deepseek":
+            kwargs = {
+                "api_key": settings.deepseek_api_key,
+                "base_url": settings.deepseek_base_url,
+            }
+            self.model = settings.deepseek_model
         else:
             kwargs = {"api_key": settings.openai_api_key}
             if settings.openai_base_url:
@@ -34,7 +40,7 @@ class LLMClient:
     def _token_limit_kwargs(self) -> dict[str, int]:
         if self.max_tokens is None:
             return {}
-        if self.provider == "ollama":
+        if self.provider in {"ollama", "deepseek"}:
             return {"max_tokens": self.max_tokens}
         return {"max_completion_tokens": self.max_tokens}
 

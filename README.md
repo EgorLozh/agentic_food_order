@@ -5,7 +5,7 @@ Telegram-бот для заказов еды на самовывоз. Клиен
 ## Возможности
 
 - Диалог в Telegram (aiogram 3)
-- LLM-агент заказа (OpenAI API или локальный Ollama)
+- LLM-агент заказа (OpenAI API, DeepSeek API или локальный Ollama)
 - Меню и цены из Google Sheets (FeedMer) либо из JSON-фикстур
 - Точки самовывоза из PostgreSQL или `config/cafes.yaml`
 - Уведомление админу в Telegram после подтверждения заказа
@@ -15,7 +15,7 @@ Telegram-бот для заказов еды на самовывоз. Клиен
 
 - Python 3.11+
 - Токен Telegram-бота
-- LLM: ключ OpenAI **или** запущенный Ollama
+- LLM: ключ OpenAI / DeepSeek **или** запущенный Ollama
 - `ADMIN_TELEGRAM_ID` — куда слать новые заказы
 
 Опционально: Google Sheets (меню), PostgreSQL (кафе), Telethon (бенч).
@@ -46,9 +46,10 @@ food-order-bot
 |---|---|
 | `BOT_TOKEN` | Токен бота |
 | `ADMIN_TELEGRAM_ID` | Telegram ID получателя заказов |
-| `LLM_PROVIDER` | `openai` или `ollama` |
+| `LLM_PROVIDER` | `openai`, `ollama` или `deepseek` |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | При `LLM_PROVIDER=openai` |
 | `OLLAMA_*` | При `LLM_PROVIDER=ollama` |
+| `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL` | При `LLM_PROVIDER=deepseek` |
 | `DATABASE_URL` | PostgreSQL с кафе (иначе YAML) |
 | `SPREADSHEET_ID` + Google credentials | Меню из Sheets (иначе фикстуры) |
 | `ORDER_SCHEMA_PATH` | Схема обязательных полей заказа |
