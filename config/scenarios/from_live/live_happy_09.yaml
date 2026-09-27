@@ -1,0 +1,25 @@
+id: live_happy_09
+description: from_live happy Свиная Стандарт @ Петрова 29ж (n=33)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Самовывоз, Raketa на Петрова 29ж
+  expect_contains:
+  - Петров
+- send: Свиная Стандарт
+  expect_not_contains:
+  - один шаг
+- send: К 21:15, картой, телефон 89001234567
+  expect_contains:
+  - Петров
+  expect_regex: (подтверд|подтверж|верно|оформл)
+  expect_not_contains:
+  - один шаг
+- send: да
+  await_replies: 2
+  expect_contains:
+  - Новый заказ
+  - ORD-
+  - Петров

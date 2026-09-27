@@ -1,0 +1,18 @@
+id: live_stepwise_19
+description: from_live stepwise Куриная Стандарт @ Петрова 29ж (n=14)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Куриная Стандарт, одну
+  expect_not_contains:
+  - один шаг
+- send: Точка Raketa на Петрова 29ж
+  expect_contains:
+  - Петров
+- send: К 16:40
+- send: Телефон +7 900 123-45-67
+  expect_contains:
+  - Петров
+  expect_regex: (подтверд|подтверж|верно|оформл)

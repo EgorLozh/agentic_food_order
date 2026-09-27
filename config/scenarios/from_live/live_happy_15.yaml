@@ -1,0 +1,25 @@
+id: live_happy_15
+description: from_live happy С говядиной Биг @ Петрова 29ж (n=5)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Самовывоз, Raketa на Петрова 29ж
+  expect_contains:
+  - Петров
+- send: С говядиной Биг
+  expect_not_contains:
+  - один шаг
+- send: К 12:25, картой, телефон 89001234567
+  expect_contains:
+  - Петров
+  expect_regex: (подтверд|подтверж|верно|оформл)
+  expect_not_contains:
+  - один шаг
+- send: да
+  await_replies: 2
+  expect_contains:
+  - Новый заказ
+  - ORD-
+  - Петров

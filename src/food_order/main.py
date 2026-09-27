@@ -48,6 +48,7 @@ async def run() -> None:
     agent = OrderAgent(llm=llm, schema=schema, tools=tools)
     orchestrator = OrderOrchestrator(
         agent=agent,
+        turn_timeout_seconds=settings.agent_turn_timeout_seconds,
     )
 
     sessions = SessionStore(history_limit=settings.dialog_history_limit)

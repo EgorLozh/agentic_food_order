@@ -1,0 +1,18 @@
+id: live_stepwise_25
+description: from_live stepwise Куриная Мини @ Молодежной 107б (n=5)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Куриная Мини, одну
+  expect_not_contains:
+  - один шаг
+- send: Точка Raketa на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: К 12:40
+- send: Телефон +7 900 123-45-67
+  expect_contains:
+  - Молодеж
+  expect_regex: (подтверд|подтверж|верно|оформл)

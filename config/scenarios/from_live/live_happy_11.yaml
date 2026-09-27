@@ -1,0 +1,25 @@
+id: live_happy_11
+description: from_live happy Куриная Мини @ Молодежной 107б (n=18)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Самовывоз, Raketa на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: Куриная Мини
+  expect_not_contains:
+  - один шаг
+- send: К 20:25, картой, телефон 89001234567
+  expect_contains:
+  - Молодеж
+  expect_regex: (подтверд|подтверж|верно|оформл)
+  expect_not_contains:
+  - один шаг
+- send: да
+  await_replies: 2
+  expect_contains:
+  - Новый заказ
+  - ORD-
+  - Молодеж

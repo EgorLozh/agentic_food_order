@@ -1,0 +1,17 @@
+id: live_stepwise_23
+description: from_live stepwise Свиная Стандарт @ Молодежной 107б (n=6)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Свиная Стандарт, одну
+  expect_not_contains:
+  - один шаг
+- send: Точка Raketa на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: Телефон +7 900 123-45-67
+  expect_contains:
+  - Молодеж
+  expect_regex: (подтверд|подтверж|верно|оформл)

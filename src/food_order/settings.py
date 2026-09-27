@@ -68,6 +68,9 @@ class Settings(BaseSettings):
 
     llm_timeout_seconds: float = Field(default=30.0, alias="LLM_TIMEOUT_SECONDS")
     llm_max_tokens: int | None = Field(default=None, alias="LLM_MAX_TOKENS")
+    agent_turn_timeout_seconds: float = Field(
+        default=90.0, alias="AGENT_TURN_TIMEOUT_SECONDS"
+    )
 
     @field_validator("pos_sync_enabled", mode="before")
     @classmethod

@@ -1,0 +1,13 @@
+id: live_cancel_27
+description: from_live cancel (n=5)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Куриная Стандарт на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: /cancel
+  expect_contains:
+  - отмен

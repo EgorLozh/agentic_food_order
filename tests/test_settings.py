@@ -16,7 +16,13 @@ def _base_kwargs(**overrides: object) -> dict[str, object]:
 
 def test_deepseek_requires_api_key() -> None:
     with pytest.raises(ValidationError, match="DEEPSEEK_API_KEY"):
-        Settings(**_base_kwargs(LLM_PROVIDER="deepseek", OPENAI_API_KEY=None))
+        Settings(
+            **_base_kwargs(
+                LLM_PROVIDER="deepseek",
+                OPENAI_API_KEY=None,
+                DEEPSEEK_API_KEY="",
+            )
+        )
 
 
 def test_deepseek_accepts_api_key() -> None:
@@ -31,3 +37,8 @@ def test_deepseek_accepts_api_key() -> None:
     assert settings.deepseek_api_key == "sk-deepseek"
     assert settings.deepseek_model == "deepseek-flash"
     assert settings.deepseek_base_url == "https://api.deepseek.com"
+
+
+def test_agent_turn_timeout_default() -> None:
+    settings = Settings(**_base_kwargs())
+    assert settings.agent_turn_timeout_seconds == 90.0

@@ -1,0 +1,25 @@
+id: live_happy_03
+description: from_live happy Куриная Стандарт @ Молодежной 107б (n=89)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Самовывоз, Raketa на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: Куриная Стандарт
+  expect_not_contains:
+  - один шаг
+- send: К 21:35, картой, телефон 89001234567
+  expect_contains:
+  - Молодеж
+  expect_regex: (подтверд|подтверж|верно|оформл)
+  expect_not_contains:
+  - один шаг
+- send: да
+  await_replies: 2
+  expect_contains:
+  - Новый заказ
+  - ORD-
+  - Молодеж

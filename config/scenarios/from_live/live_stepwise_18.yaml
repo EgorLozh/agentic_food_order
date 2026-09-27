@@ -1,0 +1,18 @@
+id: live_stepwise_18
+description: from_live stepwise Куриная Стандарт @ Молодежной 107б (n=28)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Куриная Стандарт, одну
+  expect_not_contains:
+  - один шаг
+- send: Точка Raketa на Молодежной 107б
+  expect_contains:
+  - Молодеж
+- send: К 23:40
+- send: Телефон +7 900 123-45-67
+  expect_contains:
+  - Молодеж
+  expect_regex: (подтверд|подтверж|верно|оформл)

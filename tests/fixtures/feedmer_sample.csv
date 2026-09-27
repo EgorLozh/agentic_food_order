@@ -1,0 +1,34 @@
+userid,text,timestamp,toUser,buttons,step
+user_t01,Шаурма,2026-09-18 10:00:00.000,False,NULL,0
+user_t01,На связи космический бот,2026-09-18 10:00:01.000,True,NULL,NULL
+user_t01,Самовывоз,2026-09-18 10:00:05.000,False,NULL,stepDeliveryOrPreorder
+user_t01,Выберите точку,2026-09-18 10:00:06.000,True,NULL,NULL
+user_t01,Raketa на Молодежной 107б,2026-09-18 10:00:10.000,False,NULL,stepOfCafeChanging
+user_t01,Куриная Биг 440г,2026-09-18 10:00:20.000,False,NULL,stepOfOrderAIClarifica
+user_t01,"Верно ли я собрал заказ? Вы хотите:  • Куриная Биг 440г 410 ₽  Сумма заказа: 410 ₽",2026-09-18 10:00:21.000,True,NULL,NULL
+user_t01,Все верно,2026-09-18 10:00:25.000,False,NULL,stepOfOrderAICheck
+user_t01,"Проверьте и подтвердите заказ: Место получения: [АДРЕС] • Куриная Биг 440г 410 ₽ Сумма: 410 ₽",2026-09-18 10:00:26.000,True,NULL,NULL
+user_t01,Все верно,2026-09-18 10:00:30.000,False,NULL,stepOfOrderCheck
+user_t01,картой при получении,2026-09-18 10:00:35.000,False,NULL,stepOfPayWay
+user_t01,payment succeeded,2026-09-18 10:00:40.000,False,NULL,stepOfPay
+user_t01,К какому времени приготовить?,2026-09-18 10:00:41.000,True,NULL,NULL
+user_t01,22:05,2026-09-18 10:00:45.000,False,NULL,stepOfTime
+user_t01,"Приготовим к 22:05 в Raketa на Молодежной 107б: • Куриная Биг 440г 410 ₽",2026-09-18 10:00:46.000,True,NULL,NULL
+user_t02,Шаурма,2026-09-18 11:00:00.000,False,NULL,shawa
+user_t02,Какую шаурму,2026-09-18 11:00:05.000,True,NULL,NULL
+user_t03,Очистить корзину,2026-09-18 12:00:00.000,False,NULL,stepTooLate
+user_t03,nylledStepByUser,2026-09-18 12:00:01.000,False,NULL,0
+user_t04,Заказать доставку,2026-09-18 13:00:00.000,False,NULL,stepOfAISuggestDelivery
+user_t04,[АДРЕС],2026-09-18 13:00:10.000,False,NULL,stepOfAddr
+user_t05,Куриная Стандарт 320г,2026-09-18 14:00:00.000,False,NULL,1
+user_t05,Raketa на Петрова 29ж,2026-09-18 14:00:10.000,False,NULL,stepOfCafeChanging
+user_t05,Все верно,2026-09-18 14:00:20.000,False,NULL,stepOfOrderCheck
+user_t06,Самовывоз,2026-09-18 15:00:00.000,False,NULL,stepDeliveryOrPreorder
+user_t06,Raketa на Удмуртская 255п,2026-09-18 15:00:05.000,False,NULL,stepOfCafeChanging
+user_t06,Свиная Стандарт 320г,2026-09-18 15:00:10.000,False,NULL,pork
+user_t06,Картофель Фри 100гр,2026-09-18 15:00:15.000,False,NULL,4
+user_t06,"Проверьте заказ: • Свиная Стандарт 320г 360 ₽ • Картофель Фри 100гр 140 ₽ в Raketa на Удмуртская 255п",2026-09-18 15:00:16.000,True,NULL,NULL
+user_t06,Все верно,2026-09-18 15:00:20.000,False,NULL,stepOfOrderCheck
+user_t06,наличными,2026-09-18 15:00:25.000,False,NULL,stepOfPayWay
+user_t06,21:35,2026-09-18 15:00:30.000,False,NULL,stepOfTime
+user_t06,"Приготовим к 21:35 в Raketa на Удмуртская 255п: • Свиная Стандарт 320г • Картофель Фри 100гр",2026-09-18 15:00:31.000,True,NULL,NULL

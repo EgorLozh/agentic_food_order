@@ -1,0 +1,371 @@
+{
+  "csv": "feedmer_analytics_masked.csv",
+  "rows": 76100,
+  "sessions_total": 3255,
+  "sessions_kept": 1009,
+  "dropped_filter": 2246,
+  "pickups_remapped": 563,
+  "by_kind": {
+    "happy": 755,
+    "ambiguous": 119,
+    "stepwise": 130,
+    "cancel": 5
+  },
+  "scenarios_written": 27,
+  "top_patterns": [
+    {
+      "kind": "happy",
+      "count": 89,
+      "items": [
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "21:35",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 78,
+      "items": [
+        "Куриная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "02:55",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 59,
+      "items": [
+        "Куриная Биг"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "12:00",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 37,
+      "items": [
+        "Куриная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "13:20",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 36,
+      "items": [
+        "Свиная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "16:50",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 35,
+      "items": [
+        "Свиная Биг"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "13:05",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 33,
+      "items": [
+        "Свиная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "21:15",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 29,
+      "items": [
+        "Свиная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "13:40",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 18,
+      "items": [
+        "Куриная Мини"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "20:25",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 17,
+      "items": [
+        "Куриная Мини"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "13:55",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 12,
+      "items": [
+        "Свиная Стандарт",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "11:30",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 12,
+      "items": [
+        "Куриная Стандарт",
+        "Свиная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "15:15",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 9,
+      "items": [
+        "Куриная Биг",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "21:45",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 9,
+      "items": [
+        "Куриная Стандарт",
+        "Свиная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "11:30",
+      "payment": "картой"
+    },
+    {
+      "kind": "happy",
+      "count": 8,
+      "items": [
+        "Куриная Мини",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "12:50",
+      "payment": "картой"
+    },
+    {
+      "kind": "stepwise",
+      "count": 28,
+      "items": [
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "23:40",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 14,
+      "items": [
+        "Куриная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "16:40",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 12,
+      "items": [
+        "Куриная Мини"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "18:40",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 9,
+      "items": [
+        "Свиная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": "18:30",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 8,
+      "items": [
+        "Куриная Биг"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "12:30",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 6,
+      "items": [
+        "Свиная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 5,
+      "items": [
+        "Куриная Биг",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "15:50",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 5,
+      "items": [
+        "Куриная Мини"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": "12:40",
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 4,
+      "items": [
+        "Куриная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Свиная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Куриная Биг"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": null,
+      "payment": "картой"
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Куриная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": null,
+      "payment": "картой"
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Свиная Биг",
+        "Свиная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Куриная Биг",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Петрова 29ж",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "stepwise",
+      "count": 2,
+      "items": [
+        "Куриная Мини",
+        "Куриная Стандарт"
+      ],
+      "pickup": "Молодежной 107б",
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "ambiguous",
+      "count": 119,
+      "items": null,
+      "pickup": null,
+      "time": null,
+      "payment": null
+    },
+    {
+      "kind": "cancel",
+      "count": 5,
+      "items": null,
+      "pickup": null,
+      "time": null,
+      "payment": null
+    }
+  ],
+  "scenario_ids": [
+    "live_happy_01",
+    "live_happy_02",
+    "live_happy_03",
+    "live_happy_04",
+    "live_happy_05",
+    "live_happy_06",
+    "live_happy_07",
+    "live_happy_08",
+    "live_happy_09",
+    "live_happy_10",
+    "live_happy_11",
+    "live_happy_12",
+    "live_happy_13",
+    "live_happy_14",
+    "live_happy_15",
+    "live_happy_16",
+    "live_happy_17",
+    "live_stepwise_18",
+    "live_stepwise_19",
+    "live_stepwise_20",
+    "live_stepwise_21",
+    "live_stepwise_22",
+    "live_stepwise_23",
+    "live_stepwise_24",
+    "live_stepwise_25",
+    "live_ambiguous_26",
+    "live_cancel_27"
+  ]
+}

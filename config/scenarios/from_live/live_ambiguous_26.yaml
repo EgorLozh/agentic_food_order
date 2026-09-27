@@ -1,0 +1,9 @@
+id: live_ambiguous_26
+description: from_live ambiguous shaurma (n=119)
+turns:
+- send: /cancel
+- send: /start
+  expect_contains:
+  - заказ
+- send: Хочу шаурму
+  expect_regex: (размер|мини|стандарт|биг|кури|свин|говяд|кревет)
