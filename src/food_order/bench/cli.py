@@ -11,6 +11,7 @@ from food_order.bench.client import BenchTelegramClient
 from food_order.bench.report import (
     compare_reports,
     load_report,
+    print_report_dict,
     print_run_table,
     save_report,
 )
@@ -194,11 +195,18 @@ def main(argv: list[str] | None = None) -> None:
     cmp_p.add_argument("left", type=Path, help="First report JSON")
     cmp_p.add_argument("right", type=Path, help="Second report JSON")
 
+    show_p = sub.add_parser("show", help="Print table + quality %% from a saved report")
+    show_p.add_argument("report", type=Path, help="Report JSON path")
+
     args = parser.parse_args(argv)
 
     if args.command == "compare":
         code = compare_reports(load_report(args.left), load_report(args.right))
         raise SystemExit(code)
+
+    if args.command == "show":
+        print_report_dict(load_report(args.report))
+        raise SystemExit(0)
 
     if args.command == "run":
         raise SystemExit(asyncio.run(_cmd_run(args)))

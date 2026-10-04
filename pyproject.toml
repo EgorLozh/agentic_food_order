@@ -13,6 +13,8 @@ dependencies = [
     "pydantic-settings>=2.6.0",
     "pyyaml>=6.0.2",
     "structlog>=24.4.0",
+    # IANA time zones for zoneinfo (cafe local time on Windows, where the OS has none)
+    "tzdata>=2024.1",
 ]
 
 [project.optional-dependencies]

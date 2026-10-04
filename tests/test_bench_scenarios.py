@@ -67,6 +67,42 @@ def test_default_report_path_uses_timestamp() -> None:
     assert path == Path("reports") / "20260920_230507_openai_gpt-5_1-mini.json"
 
 
+def test_summarize_quality_pct() -> None:
+    from food_order.bench.report import summarize_quality
+
+    scenarios = [
+        ScenarioResult(
+            id="a",
+            description="",
+            ok=True,
+            total_ms=1,
+            turns=[
+                TurnResult(0, "x", "y", 1.0, True),
+                TurnResult(1, "x", "y", 1.0, True),
+            ],
+        ),
+        ScenarioResult(
+            id="b",
+            description="",
+            ok=False,
+            total_ms=1,
+            turns=[
+                TurnResult(0, "x", "y", 1.0, True),
+                TurnResult(1, "x", "y", None, False, error="timeout"),
+            ],
+        ),
+    ]
+    q = summarize_quality(scenarios)
+    assert q["scenarios_passed"] == 1
+    assert q["scenarios_failed"] == 1
+    assert q["scenarios_pass_pct"] == 50.0
+    assert q["scenarios_fail_pct"] == 50.0
+    assert q["turns_passed"] == 3
+    assert q["turns_failed"] == 1
+    assert q["turns_pass_pct"] == 75.0
+    assert q["turns_fail_pct"] == 25.0
+
+
 
 def test_report_ok_and_compare(tmp_path: Path) -> None:
     report = RunReport(

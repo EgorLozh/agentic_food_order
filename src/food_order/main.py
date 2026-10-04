@@ -7,8 +7,8 @@ import sys
 import structlog
 
 from food_order.adapters.factory import build_data_adapter
+from food_order.adapters.orders_factory import build_order_sink
 from food_order.adapters.pickup import build_pickup_source
-from food_order.adapters.telegram_orders import TelegramAdminOrderSink
 from food_order.bot.app import create_bot, create_dispatcher
 from food_order.domain.schema_loader import load_order_schema
 from food_order.llm.client import LLMClient
@@ -32,8 +32,6 @@ def configure_logging() -> None:
 
 async def run() -> None:
     settings = get_settings()
-    if settings.admin_telegram_id is None:
-        raise RuntimeError("ADMIN_TELEGRAM_ID is required in .env")
 
     schema = load_order_schema(settings.order_schema_path)
 
@@ -41,7 +39,7 @@ async def run() -> None:
     adapter = build_data_adapter(settings, pickup_source=pickup)
 
     bot = create_bot(settings)
-    order_sink = TelegramAdminOrderSink(bot, settings.admin_telegram_id)
+    order_sink = build_order_sink(settings, bot=bot)
     tools = ToolRegistry(menu_source=adapter, order_sink=order_sink)
 
     llm = LLMClient(settings)
@@ -64,9 +62,10 @@ async def run() -> None:
     try:
         await dp.start_polling(bot)
     finally:
-        close = getattr(pickup, "close", None)
-        if close is not None:
-            await close()
+        for closeable in (order_sink, pickup):
+            close = getattr(closeable, "close", None)
+            if close is not None:
+                await close()
 
 
 def main() -> None:

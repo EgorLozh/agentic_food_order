@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     database_url: str | None = Field(default=None, alias="DATABASE_URL")
     cafe_ids: str | None = Field(default=None, alias="CAFE_IDS")
 
+    # Where confirmed orders go: telegram (admin chat), postgres (shared FeedMer DB) or both.
+    order_sink: str = Field(default="telegram", alias="ORDER_SINK")
+    orders_database_url: str | None = Field(default=None, alias="ORDERS_DATABASE_URL")
+    orders_default_cafe_id: int | None = Field(
+        default=None, alias="ORDERS_DEFAULT_CAFE_ID"
+    )
+
     spreadsheet_id: str | None = Field(default=None, alias="SPREADSHEET_ID")
     api_sheets_google_key: str | None = Field(
         default=None, alias="API_SHEETS_GOOGLE_KEY"
