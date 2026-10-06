@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import structlog
 
@@ -19,6 +19,7 @@ class TurnResult:
     reply_text: str
     state: OrderState
     clear_history: bool = False
+    choices: list[str] = field(default_factory=list)
 
 
 class OrderOrchestrator:
@@ -59,6 +60,7 @@ class OrderOrchestrator:
                 reply_text=turn.reply_text,
                 state=state,
                 clear_history=turn.clear_history,
+                choices=list(getattr(turn, "choices", []) or []),
             )
         except asyncio.TimeoutError:
             logger.warning(

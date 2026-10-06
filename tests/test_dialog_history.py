@@ -28,6 +28,18 @@ async def test_session_append_trims_to_limit() -> None:
 
 
 @pytest.mark.asyncio
+async def test_append_turn_keeps_only_visible_assistant_text() -> None:
+    store = SessionStore(history_limit=6)
+    session = SessionData()
+    store.append_turn(
+        session,
+        user_text="где",
+        assistant_text="Какую точку?",
+    )
+    assert session.history[1].content == "Какую точку?"
+
+
+@pytest.mark.asyncio
 async def test_session_limit_zero_disables_history() -> None:
     store = SessionStore(history_limit=0)
     session = SessionData()
@@ -38,21 +50,42 @@ async def test_session_limit_zero_disables_history() -> None:
 @pytest.mark.asyncio
 async def test_session_clear_resets_draft_and_history() -> None:
     store = SessionStore(history_limit=6)
-    session = SessionData(state=OrderState(pickup_time="14:00"))
+    session = SessionData(
+        state=OrderState(pickup_time="14:00"),
+        pending_choices=["Центр"],
+        choices_message_id=4,
+    )
     store.append_turn(session, user_text="привет", assistant_text="здравствуйте")
     await store.save(7, session)
     await store.clear(7)
     cleared = await store.get(7)
     assert cleared.history == []
     assert cleared.state.pickup_time is None
+    assert cleared.pending_choices == []
+    assert cleared.choices_message_id is None
 
 
 class CapturingLLM:
     def __init__(self) -> None:
         self.last_messages: list[dict] = []
 
-    async def complete_with_tools(self, *, messages: list[dict], tools: list) -> SimpleNamespace:
+    async def complete_with_tools(
+        self, *, messages: list[dict], tools: list, **kwargs: object
+    ) -> SimpleNamespace:
         self.last_messages = messages
+        if kwargs.get("tool_choice") != "auto":
+            return SimpleNamespace(
+                content=None,
+                tool_calls=[
+                    SimpleNamespace(
+                        id="terminal",
+                        function=SimpleNamespace(
+                            name="respond_to_customer",
+                            arguments='{"text":"Ок, продолжим.","choices":[]}',
+                        ),
+                    )
+                ],
+            )
         return SimpleNamespace(content="Ок, продолжим.", tool_calls=[])
 
 

@@ -10,7 +10,11 @@ from food_order.adapters.json_fixtures import JsonFixturesAdapter
 from food_order.domain.models import OrderState, OrderStatus
 from food_order.domain.schema_loader import load_order_schema
 from food_order.llm.order_agent import MAX_TOOL_ROUNDS, ORDER_AGENT_SYSTEM, OrderAgent
-from food_order.tools.order_agent_tools import OrderAgentTools, normalize_ru_phone
+from food_order.tools.order_agent_tools import (
+    OrderAgentTools,
+    normalize_ru_phone,
+    validate_customer_response,
+)
 from food_order.tools.registry import ToolRegistry
 
 
@@ -57,12 +61,21 @@ def test_normalize_ru_phone() -> None:
     assert normalize_ru_phone("123") is None
 
 
-def test_system_prompt_covers_phone_and_confirmation() -> None:
+def test_system_prompt_defines_choice_flow() -> None:
     assert "телефон" in ORDER_AGENT_SYSTEM.lower()
     assert "submit_order" in ORDER_AGENT_SYSTEM
     assert "replace=true" in ORDER_AGENT_SYSTEM
     assert "вечером" in ORDER_AGENT_SYSTEM.lower()
-    assert "не подставляй час" in ORDER_AGENT_SYSTEM.lower()
+    assert "respond_to_customer" in ORDER_AGENT_SYSTEM
+    assert "2–8" in ORDER_AGENT_SYSTEM
+    assert "своими словами" in ORDER_AGENT_SYSTEM
+    assert "Начать заказ" in ORDER_AGENT_SYSTEM
+    assert "категор" in ORDER_AGENT_SYSTEM.lower()
+    assert "Не показывай всё меню" in ORDER_AGENT_SYSTEM
+    assert "не требуй поля category" in ORDER_AGENT_SYSTEM
+    assert "Добавить ещё" in ORDER_AGENT_SYSTEM
+    assert "К точке самовывоза" in ORDER_AGENT_SYSTEM
+    assert "Пустой choices вне этих трёх" in ORDER_AGENT_SYSTEM
 
 
 @pytest.mark.asyncio
@@ -74,6 +87,14 @@ async def test_set_items_requires_real_sku(registry: ToolRegistry, schema) -> No
     )
     assert result["ok"] is False
     assert not toolset.state.items
+
+
+@pytest.mark.asyncio
+async def test_get_menu_does_not_depend_on_categories(registry: ToolRegistry, schema) -> None:
+    toolset = _agent_tools(registry, schema)
+    result = await toolset.dispatch("get_menu", {})
+    assert result["ok"] is True
+    assert all("category" not in item for item in result["items"])
 
 
 @pytest.mark.asyncio
@@ -187,13 +208,119 @@ async def test_agent_loop_runs_tool_then_returns_final_reply(registry: ToolRegis
     llm = FakeLLM(
         [
             SimpleNamespace(content=None, tool_calls=[_tool_call("get_order_draft", {})]),
-            SimpleNamespace(content="Чем могу помочь с заказом?", tool_calls=[]),
+            SimpleNamespace(
+                content=None,
+                tool_calls=[
+                    _tool_call(
+                        "respond_to_customer",
+                        {"text": "Чем могу помочь с заказом?", "choices": []},
+                    )
+                ],
+            ),
         ]
     )
     agent = OrderAgent(llm=llm, schema=schema, tools=registry)  # type: ignore[arg-type]
     turn = await agent.respond(telegram_user_id=7, text="привет", state=OrderState())
     assert turn.reply_text == "Чем могу помочь с заказом?"
     assert turn.tool_rounds == 1
+
+
+@pytest.mark.parametrize(
+    ("arguments", "expected"),
+    [
+        ({"text": "Введите время", "choices": []}, ("Введите время", [])),
+        (
+            {"text": "Выберите точку", "choices": [" Центр ", "Север"]},
+            ("Выберите точку", ["Центр", "Север"]),
+        ),
+    ],
+)
+def test_validate_customer_response_accepts_text_and_choices(
+    arguments: dict[str, object], expected: tuple[str, list[str]]
+) -> None:
+    assert validate_customer_response(arguments) == expected
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        {"text": "", "choices": []},
+        {"text": "Выберите", "choices": ["Только одна"]},
+        {"text": "Выберите", "choices": ["Центр", "Центр"]},
+        {"text": "Выберите", "choices": ["Центр", "А" * 41]},
+        {"text": "Выберите", "choices": ["", "Север"]},
+    ],
+)
+def test_validate_customer_response_rejects_invalid_arguments(
+    arguments: dict[str, object],
+) -> None:
+    assert isinstance(validate_customer_response(arguments), str)
+
+
+@pytest.mark.asyncio
+async def test_agent_returns_choices_from_terminal_tool(registry: ToolRegistry, schema) -> None:
+    llm = FakeLLM(
+        [
+            SimpleNamespace(
+                content=None,
+                tool_calls=[
+                    _tool_call(
+                        "respond_to_customer",
+                        {
+                            "text": "Какую точку выбрать?",
+                            "choices": ["Центр", "Север"],
+                        },
+                    )
+                ],
+            )
+        ]
+    )
+    agent = OrderAgent(llm=llm, schema=schema, tools=registry)  # type: ignore[arg-type]
+    turn = await agent.respond(telegram_user_id=7, text="где забрать", state=OrderState())
+    assert turn.reply_text == "Какую точку выбрать?"
+    assert turn.choices == ["Центр", "Север"]
+
+
+@pytest.mark.asyncio
+async def test_agent_recovers_free_text_as_terminal_tool(registry: ToolRegistry, schema) -> None:
+    llm = FakeLLM(
+        [
+            SimpleNamespace(content="Какую точку выбрать?", tool_calls=[]),
+            SimpleNamespace(
+                content=None,
+                tool_calls=[
+                    _tool_call(
+                        "respond_to_customer",
+                        {
+                            "text": "Какую точку выбрать?",
+                            "choices": ["Центр", "Север"],
+                        },
+                    )
+                ],
+            ),
+        ]
+    )
+    agent = OrderAgent(llm=llm, schema=schema, tools=registry)  # type: ignore[arg-type]
+    turn = await agent.respond(telegram_user_id=7, text="где забрать", state=OrderState())
+    assert turn.reply_text == "Какую точку выбрать?"
+    assert turn.choices == ["Центр", "Север"]
+    assert llm.calls == 2
+
+
+@pytest.mark.asyncio
+async def test_agent_uses_plain_text_when_terminal_tool_is_unavailable(
+    registry: ToolRegistry, schema
+) -> None:
+    llm = FakeLLM(
+        [
+            SimpleNamespace(content="Напишите время в формате 14:00.", tool_calls=[]),
+            SimpleNamespace(content="Напишите время в формате 14:00.", tool_calls=[]),
+        ]
+    )
+    agent = OrderAgent(llm=llm, schema=schema, tools=registry)  # type: ignore[arg-type]
+    turn = await agent.respond(telegram_user_id=7, text="вечером", state=OrderState())
+    assert turn.reply_text == "Напишите время в формате 14:00."
+    assert turn.choices == []
 
 
 @pytest.mark.asyncio

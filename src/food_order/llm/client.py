@@ -73,12 +73,13 @@ class LLMClient:
         *,
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
+        tool_choice: Any = "auto",
     ) -> ChatCompletionMessage:
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=messages,  # type: ignore[arg-type]
             tools=tools,  # type: ignore[arg-type]
-            tool_choice="auto",
+            tool_choice=tool_choice,
             timeout=self.timeout,
             **self._token_limit_kwargs(),
         )

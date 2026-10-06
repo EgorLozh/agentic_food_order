@@ -144,6 +144,35 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "respond_to_customer",
+            "description": (
+                "Завершить текущий ход и отправить клиенту ответ. Вызывай после всех "
+                "нужных tools вместо обычного текста. choices=[] допустим только для "
+                "времени HH:MM, телефона и сообщения после успешного submit_order. "
+                "Во всех остальных ответах передай 2–8 коротких уникальных подписей. "
+                "Сразу после set_items, если точка ещё не выбрана, choices ровно "
+                "«Добавить ещё» и «К точке самовывоза». Иначе: категории из реальных "
+                "позиций, реальные позиции, точки, «наличные»/«карта» или «да»/«нет». "
+                "Не передавай одну кнопку и не пиши служебные маркеры кнопок в text."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string", "minLength": 1},
+                    "choices": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {"type": "string", "minLength": 1, "maxLength": 40},
+                    },
+                },
+                "required": ["text", "choices"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_order_summary",
             "description": (
                 "Проверить полноту (позиции, точка, время, оплата, телефон) и получить итог. "
@@ -176,6 +205,9 @@ ORDER_AGENT_TOOLS: list[dict[str, Any]] = [
 ]
 
 _TIME_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+MIN_CHOICES = 2
+MAX_CHOICES = 8
+MAX_CHOICE_LABEL_LEN = 40
 
 _MISSING_FIELD_LABELS = {
     "items": "позиции",
@@ -184,6 +216,39 @@ _MISSING_FIELD_LABELS = {
     "payment_method": "способ оплаты",
     "phone": "телефон",
 }
+
+
+def _validate_choices(raw: object) -> list[str] | str:
+    if not isinstance(raw, list):
+        return f"choices must be a list of {MIN_CHOICES} to {MAX_CHOICES} strings"
+    labels: list[str] = []
+    for item in raw:
+        if not isinstance(item, str):
+            return "Each choice must be a string"
+        label = item.strip()
+        if not label:
+            return "Choice labels must be non-empty"
+        if len(label) > MAX_CHOICE_LABEL_LEN:
+            return f"Choice label must be at most {MAX_CHOICE_LABEL_LEN} characters"
+        labels.append(label)
+    if len(labels) < MIN_CHOICES or len(labels) > MAX_CHOICES:
+        return f"choices must contain {MIN_CHOICES} to {MAX_CHOICES} items"
+    if len(set(labels)) != len(labels):
+        return "Choice labels must be unique"
+    return labels
+
+
+def validate_customer_response(arguments: dict[str, Any]) -> tuple[str, list[str]] | str:
+    text = arguments.get("text")
+    if not isinstance(text, str) or not (reply_text := text.strip()):
+        return "text must be a non-empty string"
+    raw_choices = arguments.get("choices")
+    if raw_choices == []:
+        return reply_text, []
+    choices = _validate_choices(raw_choices)
+    if isinstance(choices, str):
+        return choices
+    return reply_text, choices
 
 
 def normalize_ru_phone(raw: str) -> str | None:

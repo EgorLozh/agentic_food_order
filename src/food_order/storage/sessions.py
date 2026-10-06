@@ -18,6 +18,8 @@ class DialogMessage:
 class SessionData:
     state: OrderState = field(default_factory=OrderState)
     history: list[DialogMessage] = field(default_factory=list)
+    pending_choices: list[str] = field(default_factory=list)
+    choices_message_id: int | None = None
 
 
 class SessionStore:
@@ -37,12 +39,16 @@ class SessionStore:
         return SessionData(
             state=session.state.model_copy(deep=True),
             history=[DialogMessage(role=m.role, content=m.content) for m in session.history],
+            pending_choices=list(session.pending_choices),
+            choices_message_id=session.choices_message_id,
         )
 
     async def save(self, telegram_user_id: int, session: SessionData) -> None:
         self._sessions[telegram_user_id] = SessionData(
             state=session.state.model_copy(deep=True),
             history=[DialogMessage(role=m.role, content=m.content) for m in session.history],
+            pending_choices=list(session.pending_choices),
+            choices_message_id=session.choices_message_id,
         )
 
     def append_turn(
@@ -56,7 +62,12 @@ class SessionStore:
             session.history = []
             return session
         session.history.append(DialogMessage(role="user", content=user_text))
-        session.history.append(DialogMessage(role="assistant", content=assistant_text))
+        session.history.append(
+            DialogMessage(
+                role="assistant",
+                content=assistant_text,
+            )
+        )
         session.history = session.history[-self.history_limit :]
         return session
 
